@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}RSA Web Toolkit{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" style="text-decoration:none;">
+      <div class="brand">
+        <span class="brand-mark">RSA</span>
+        <span class="brand-name" style="color: var(--text);">Web Toolkit</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/keygen" class="nav-link {% if active == 'keygen' %}active{% endif %}">Key Gen</a>
+      <a href="/files" class="nav-link {% if active == 'files' %}active{% endif %}">Files &amp; Images</a>
+      <a href="/crack" class="nav-link {% if active == 'crack' %}active{% endif %}">Crack</a>
+    </nav>
+    <a href="https://github.com/vaibhavmirche7/rsa_toolkit" target="_blank" rel="noopener noreferrer" class="nav-about">About</a>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}RSA Web Toolkit{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-eyebrow">n = p × q</div>
+    <h1>Build keys.<br>Move secrets.<br>Break the weak ones.</h1>
+    <p>A small workbench for RSA: generate real (or deliberately weak) key pairs, encrypt strings and files, and run the same attacks a CTF challenge would throw at a badly-chosen key.</p>
+  </div>
+  <div class="cipher-disk">
+    <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="cipher disk">
+      <circle cx="120" cy="120" r="108" fill="none" stroke="#223039" stroke-width="1"/>
+      <circle cx="120" cy="120" r="84" fill="none" stroke="#a97a34" stroke-width="1"/>
+      <circle cx="120" cy="120" r="60" fill="none" stroke="#223039" stroke-width="1"/>
+      <circle cx="120" cy="120" r="36" fill="none" stroke="#4FB0AE" stroke-width="1"/>
+      <g stroke="#E8A33D" stroke-width="1.4">
+        {% for i in range(36) %}
+        <line x1="120" y1="12" y2="24" x2="120" transform="rotate({{ i * 10 }} 120 120)"/>
+        {% endfor %}
+      </g>
+      <g stroke="#4FB0AE" stroke-width="1" opacity="0.7">
+        {% for i in range(12) %}
+        <line x1="120" y1="36" y2="48" x2="120" transform="rotate({{ i * 30 }} 120 120)"/>
+        {% endfor %}
+      </g>
+      <circle cx="120" cy="120" r="3" fill="#E8A33D"/>
+    </svg>
+  </div>
+</section>
+
+<div class="mode-grid">
+  <a class="mode-card" href="/keygen">
+    <span class="idx">01 · GENERATE</span>
+    <h3>RSA Key Gen</h3>
+    <p>Pick a key size, generate a real keypair (or a deliberately weak one), inspect every step of the math, then encrypt or decrypt a string with it.</p>
+  </a>
+
+  <a class="mode-card" href="/files">
+    <span class="idx">02 · SECURE</span>
+    <h3>Files &amp; Images</h3>
+    <p>Hybrid AES + RSA encryption for files and images: RSA wraps a one-time AES key, AES does the heavy lifting.</p>
+  </a>
+
+  <a class="mode-card" href="/crack">
+    <span class="idx">03 · ATTACK</span>
+    <h3>Crack a Weak Key</h3>
+    <p>Load a PEM or paste n/e/c by hand. Runs Wiener, Fermat, factordb, and general factoring, each under its own time limit.</p>
+  </a>
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Key Gen — RSA Web Toolkit{% endblock %}
+
+{% block content %}
+<h1 style="font-size:26px;">01 · RSA Key Gen</h1>
+<p style="color:var(--text-muted); max-width: 60ch; margin-top:-6px;">
+  Generate a real keypair, or deliberately weaken one to see why Fermat
+  and Wiener attacks work, then use the key to encrypt or decrypt a string.
+</p>
+
+<!-- ============ GENERATE ============ -->
+<div class="panel">
+  <div class="panel-title">Generate keypair</div>
+
+  <div class="field-row">
+    <div class="field">
+      <label for="f-bits">Key size</label>
+      <select id="f-bits">
+        {% for b in allowed_bits %}
+        <option value="{{ b }}" {% if b == 2048 %}selected{% endif %}>{{ b }}-bit</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="f-mode">Generation mode</label>
+      <select id="f-mode">
+        <option value="standard">Standard (secure)</option>
+        <option value="weak_fermat">Weak — close primes (Fermat-vulnerable)</option>
+        <option value="weak_wiener">Weak — small d (Wiener-vulnerable)</option>
+      </select>
+    </div>
+
+    <div class="field" id="f-e-wrap">
+      <label for="f-e">Public exponent e</label>
+      <input type="number" id="f-e" value="65537" min="3" step="2">
+    </div>
+  </div>
+
+  <p id="mode-hint" class="strength-note warn" style="display:none;"></p>
+
+  <div class="btn-row">
+    <button class="btn" id="btn-generate">Generate keypair</button>
+  </div>
+</div>
+
+<!-- ============ RESULT ============ -->
+<div class="panel hidden" id="panel-result">
+  <div class="panel-title">Key material — the math, step by step</div>
+  <div id="result-status"></div>
+  <div class="ledger" id="ledger-math"></div>
+
+  <div style="margin-top:18px; font-family:var(--font-mono); font-size:12.5px; color:var(--text-muted);">
+    fingerprint (SHA-256 of public key) &nbsp;
+    <span id="fingerprint" class="mono" style="color:var(--cyan);"></span>
+  </div>
+</div>
+
+<div class="panel hidden" id="panel-strength">
+  <div class="panel-title">Strength meter</div>
+  <div id="strength-notes"></div>
+</div>
+
+<div class="panel hidden" id="panel-export">
+  <div class="panel-title">Export in other formats</div>
+  <p style="color:var(--text-muted); font-size:12.5px; margin-top:-8px;">
+    The PEM files download automatically as soon as a key is generated. These are the same key, in other formats.
+  </p>
+  <div class="export-grid">
+    <button class="btn btn-secondary" data-export="private_der_b64" data-fname="private.der" data-b64="1">Private key — binary</button>
+    <button class="btn btn-secondary" data-export="public_der_b64" data-fname="public.der" data-b64="1">Public key — binary</button>
+    <button class="btn btn-secondary" data-export="raw_json" data-fname="keys.json" data-json="1">Raw values — text</button>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============ ENCRYPT STRING ============ -->
+<div class="panel">
+  <div class="panel-title">Encrypt a string</div>
+
+  <div class="field-row">
+    <div class="field" style="flex:2;">
+      <label>Key source</label>
+      <select id="enc-keysource">
+        <option value="generated">Use the key generated above</option>
+        <option value="pem">Paste a public key PEM</option>
+        <option value="raw">Enter n and e manually</option>
+      </select>
+    </div>
+    <div class="field-check" style="align-self:flex-end;">
+      <input type="checkbox" id="enc-oaep" checked>
+      <label for="enc-oaep">Use OAEP padding (safe, default)</label>
+    </div>
+  </div>
+
+  <div class="field-row hidden" id="enc-pem-wrap">
+    <div class="field" style="flex:1;">
+      <label>Public key PEM</label>
+      <textarea id="enc-pem" placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
+    </div>
+  </div>
+
+  <div class="field-row hidden" id="enc-raw-wrap">
+    <div class="field"><label>n</label><input type="text" id="enc-n"></div>
+    <div class="field"><label>e</label><input type="text" id="enc-e"></div>
+  </div>
+
+  <div class="field-row">
+    <div class="field" style="flex:1;">
+      <label>Plaintext</label>
+      <textarea id="enc-plaintext" placeholder="secret message"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row"><button class="btn" id="btn-encrypt">Encrypt</button></div>
+
+  <div class="ledger hidden" id="ledger-enc-result" style="margin-top:16px;"></div>
+</div>
+
+<!-- ============ DECRYPT STRING ============ -->
+<div class="panel">
+  <div class="panel-title">Decrypt a string</div>
+
+  <div class="field-row">
+    <div class="field" style="flex:2;">
+      <label>Key source</label>
+      <select id="dec-keysource">
+        <option value="generated">Use the key generated above</option>
+        <option value="pem">Paste a private key PEM</option>
+        <option value="raw">Enter n, d (and p, q for OAEP) manually</option>
+      </select>
+    </div>
+    <div class="field-check" style="align-self:flex-end;">
+      <input type="checkbox" id="dec-oaep" checked>
+      <label for="dec-oaep">Ciphertext was encrypted with OAEP</label>
+    </div>
+  </div>
+
+  <div class="field-row hidden" id="dec-pem-wrap">
+    <div class="field" style="flex:1;">
+      <label>Private key PEM</label>
+      <textarea id="dec-pem" placeholder="-----BEGIN PRIVATE KEY-----"></textarea>
+    </div>
+  </div>
+
+  <div class="field-row hidden" id="dec-raw-wrap">
+    <div class="field"><label>n</label><input type="text" id="dec-n"></div>
+    <div class="field"><label>d</label><input type="text" id="dec-d"></div>
+    <div class="field"><label>p (OAEP only)</label><input type="text" id="dec-p"></div>
+    <div class="field"><label>q (OAEP only)</label><input type="text" id="dec-q"></div>
+    <div class="field"><label>e (OAEP only)</label><input type="text" id="dec-e"></div>
+  </div>
+
+  <div class="field-row">
+    <div class="field" style="flex:1;">
+      <label>Ciphertext (integer, or base64 for OAEP)</label>
+      <textarea id="dec-ciphertext" placeholder="paste ciphertext here"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row"><button class="btn" id="btn-decrypt">Decrypt</button></div>
+
+  <div class="ledger hidden" id="ledger-dec-result" style="margin-top:16px;"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/keygen.js"></script>
+{% endblock %}

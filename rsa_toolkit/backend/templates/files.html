@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Files &amp; Images — RSA Web Toolkit{% endblock %}
+
+{% block content %}
+<h1 style="font-size:26px;">02 · Files &amp; Images</h1>
+<p style="color:var(--text-muted); max-width: 62ch; margin-top:-6px;">
+  Hybrid encryption: a one-time AES-256 key does the actual work on your
+  file, and RSA-OAEP wraps just that small key. Everything (wrapped key,
+  nonce, filename, ciphertext) comes back as a single bundle to download.
+  You'll need to upload a key here too; nothing carries over from the Key Gen page.
+</p>
+
+<!-- ============ ENCRYPT ============ -->
+<div class="panel">
+  <div class="panel-title">Encrypt a file</div>
+  <p style="color:var(--text-muted); font-size:12.5px; margin-top:-6px;">
+    Encrypting needs the <strong>public</strong> key — the one meant to be shared. Only the matching private key (used on the Decrypt side below) can open the result back up.
+  </p>
+
+  <div class="field-row">
+    <div class="field" style="flex:2;">
+      <label>Key source</label>
+      <select id="enc-keysource">
+        <option value="auto">Automatically generate a key</option>
+        <option value="raw">Enter key manually</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- auto-generate: same fields as Key Gen, but no separate Generate button —
+       the key is made at the moment you click Encrypt below -->
+  <div class="field-row" id="enc-auto-wrap">
+    <div class="field">
+      <label for="enc-bits">Key size</label>
+      <select id="enc-bits">
+        <option value="1024">1024-bit</option>
+        <option value="2048" selected>2048-bit</option>
+        <option value="4096">4096-bit</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="enc-mode">Generation mode</label>
+      <select id="enc-mode">
+        <option value="standard">Standard (secure)</option>
+        <option value="weak_fermat">Weak — close primes (Fermat-vulnerable)</option>
+        <option value="weak_wiener">Weak — small d (Wiener-vulnerable)</option>
+      </select>
+    </div>
+    <div class="field" id="enc-e-wrap">
+      <label for="enc-e-auto">Public exponent e</label>
+      <input type="number" id="enc-e-auto" value="65537" min="3" step="2">
+    </div>
+  </div>
+
+  <div class="field-row hidden" id="enc-raw-wrap">
+    <div class="field"><label>n</label><input type="text" id="enc-n"></div>
+    <div class="field"><label>e</label><input type="text" id="enc-e"></div>
+    <div class="field"><label>d</label><input type="text" id="enc-d"></div>
+    <div class="field"><label>p</label><input type="text" id="enc-p"></div>
+    <div class="field"><label>q</label><input type="text" id="enc-q"></div>
+  </div>
+
+  <div class="field-row">
+    <div class="field" style="flex:1;">
+      <label>File</label>
+      <input type="file" id="enc-file">
+    </div>
+  </div>
+
+  <div class="btn-row"><button class="btn" id="btn-encrypt-file">Encrypt &amp; download</button></div>
+  <div id="enc-file-status" style="margin-top:14px;"></div>
+</div>
+
+<!-- ============ DECRYPT ============ -->
+<div class="panel">
+  <div class="panel-title">Decrypt a file</div>
+
+  <div class="field-row">
+    <div class="field" style="flex:2;">
+      <label>Key source</label>
+      <select id="dec-keysource">
+        <option value="pem">Private key PEM</option>
+        <option value="raw">Enter n, e, d, p, q manually</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field-row" id="dec-pem-wrap">
+    <div class="field" style="flex:1;">
+      <label>Upload a private key PEM file</label>
+      <input type="file" id="dec-pem-file" accept=".pem,.key,.txt">
+    </div>
+    <div class="field" style="flex:1;">
+      <label>...or paste it directly</label>
+      <textarea id="dec-pem" placeholder="-----BEGIN PRIVATE KEY-----"></textarea>
+    </div>
+  </div>
+
+  <div class="field-row hidden" id="dec-raw-wrap">
+    <div class="field"><label>n</label><input type="text" id="dec-n"></div>
+    <div class="field"><label>e</label><input type="text" id="dec-e"></div>
+    <div class="field"><label>d</label><input type="text" id="dec-d"></div>
+    <div class="field"><label>p</label><input type="text" id="dec-p"></div>
+    <div class="field"><label>q</label><input type="text" id="dec-q"></div>
+  </div>
+
+  <div class="field-row">
+    <div class="field" style="flex:1;">
+      <label>Encrypted bundle (.rwtenc)</label>
+      <input type="file" id="dec-file">
+    </div>
+  </div>
+
+  <div class="btn-row"><button class="btn" id="btn-decrypt-file">Decrypt &amp; download</button></div>
+  <div id="dec-file-status" style="margin-top:14px;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/files.js"></script>
+{% endblock %}

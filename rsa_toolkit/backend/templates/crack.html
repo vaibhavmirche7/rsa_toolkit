@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Crack — RSA Web Toolkit{% endblock %}
+
+{% block content %}
+<h1 style="font-size:26px;">03 · Crack a Weak Key</h1>
+<p style="color:var(--text-muted); max-width: 62ch; margin-top:-6px;">
+  Give it whatever you have: a PEM, or any subset of n/e/d/p/q and a
+  ciphertext, and it'll derive what it can and run the attack chain
+  (Wiener → Fermat → factordb → general factoring) on whatever's left.
+</p>
+
+<div class="panel">
+  <div class="panel-title">Load key material</div>
+
+  <div class="field-row">
+    <div class="field" style="flex:2;">
+      <label>Input method</label>
+      <select id="input-method">
+        <option value="pem">PEM (public or private)</option>
+        <option value="manual">Manual fields</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- PEM entry -->
+  <div id="pem-wrap">
+    <div class="field-row">
+      <div class="field" style="flex:1;">
+        <label>Upload a PEM file</label>
+        <input type="file" id="f-pem-file" accept=".pem,.key,.pub,.txt">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field" style="flex:1;">
+        <label>...or paste it directly (public or private, auto-detected)</label>
+        <textarea id="f-pem" placeholder="-----BEGIN PUBLIC KEY-----" style="min-height:120px;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual entry -->
+  <div id="manual-wrap" class="hidden">
+    <div class="field-row">
+      <div class="field" style="flex:1;">
+        <label>Challenge file (optional — .txt with n=/e=/c= etc., auto-fills fields below)</label>
+        <input type="file" id="f-challenge">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>n</label><input type="text" id="f-n" data-manual-field></div>
+      <div class="field"><label>e</label><input type="text" id="f-e" data-manual-field></div>
+      <div class="field"><label>d</label><input type="text" id="f-d" data-manual-field></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>p</label><input type="text" id="f-p" data-manual-field></div>
+      <div class="field"><label>q</label><input type="text" id="f-q" data-manual-field></div>
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field" style="flex:1;">
+      <label>Ciphertext (optional — integer, 0x-hex, or base64)</label>
+      <textarea id="f-ciphertext" placeholder="leave blank to just derive/recover the key"></textarea>
+    </div>
+  </div>
+
+  <p id="plan-preview" class="strength-note ok" style="font-family:var(--font-mono);"></p>
+
+  <div class="btn-row"><button class="btn" id="btn-crack">Analyze / Crack</button></div>
+</div>
+
+<div class="panel hidden" id="panel-crack-result">
+  <div class="panel-title">Result</div>
+  <div id="crack-status"></div>
+  <div class="ledger" id="ledger-crack-math"></div>
+
+  <div id="plaintext-wrap" class="hidden" style="margin-top:16px;">
+    <div class="panel-title">Plaintext</div>
+    <div class="ledger" id="ledger-plaintext"></div>
+  </div>
+</div>
+
+<div class="panel hidden" id="panel-attack-log">
+  <div class="panel-title">Attacks tried</div>
+  <div id="attack-log-list" style="font-family:var(--font-mono); font-size:12.5px;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/crack.js"></script>
+{% endblock %}
